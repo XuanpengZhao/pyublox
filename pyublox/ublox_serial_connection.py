@@ -51,12 +51,9 @@ class UBloxSerialConnection:
             except serial.SerialException as e:
                 print("Error writing to serial port:", e)
 
+
 # Example usage
 if __name__ == "__main__":
     ublox_connection = UBloxSerialConnection("COM3", 9600)  # Replace COM3 with your port
     ublox_connection.connect()
-
-    # Your program logic here
-
-    # Clean up
     ublox_connection.disconnect()

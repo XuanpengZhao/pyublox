@@ -5,6 +5,7 @@ Description: This script is designed to create static utility functions for ublo
 """
 import binascii
 from datetime import time
+import serial.tools.list_ports
 
 class UbloxUtils:
     @staticmethod
@@ -79,6 +80,7 @@ class UbloxUtils:
         }
         return quality_descriptions.get(int(quality), "Unknown quality")  # Returns 'Unknown quality' for undefined codes
     
+    @staticmethod
     def get_posMode(pos_mode):
         """
         Retrieves the description of the GPS position mode indicator.
@@ -111,3 +113,23 @@ class UbloxUtils:
             str: The hexadecimal string representation of the reversed bytes.
         """
         return binascii.hexlify(bytes[::-1]).decode('utf-8')
+    
+    @staticmethod
+    def find_usb_device(vendor_id, product_id):
+        """
+        Searches connected USB devices and returns the port name of the device that matches the given vendor and product IDs.
+
+        This method scans through all the USB devices currently connected to the system and looks for a device that has the specified vendor ID and product ID. If such a device is found, the method returns the name of the serial port to which the device is connected. If no matching device is found, it returns None.
+
+        Args:
+            vendor_id (int): The vendor ID of the USB device to search for.
+            product_id (int): The product ID of the USB device to search for.
+
+        Returns:
+            str or None: The name of the serial port if a matching device is found, otherwise None.
+        """
+        ports = serial.tools.list_ports.comports()
+        for port in ports:
+            if port.vid == vendor_id and port.pid == product_id:
+                return port.device
+        return None
