@@ -42,8 +42,6 @@ class PythonUblox:
         credential = UbloxUtils.read_credentials(".\credentials.ini")
         self.ntrip_connection = NTRIPSocketConnection(credential["host"], credential["port"], credential["username"], credential["password"], self.ublox_connection)
         elapsed_time = 0
-        self.nmea_reader.gga.lat = 33.974584
-        self.nmea_reader.gga.lon = -117.316830
         while not self.nmea_reader.gga.lat or not self.nmea_reader.gga.lon:
             if elapsed_time >= 10: # 10 seconds timeout
                 print(f"NTRIP connection failed: Timeout waiting for GPS coordinates.")
