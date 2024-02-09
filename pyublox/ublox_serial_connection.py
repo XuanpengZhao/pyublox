@@ -1,53 +1,56 @@
 """
 author: Xuanpeng Zhao
-Date: Feb 07 2024
+Date: Feb 07 2024lf.__password
 Description: This script is designed to create serial connection to ubloxs
 """
 import serial
 import threading
 
 class UBloxSerialConnection:
-    def __init__(self, port, baud_rate=38400):
-        self.port = port
-        self.baud_rate = baud_rate
-        self.serial_conn = None
-        self.thread  = None
-        self.running = False
+    def __init__(self, port, baud_rate=38400, recv_data_callback=None):
+        self.__port = port
+        self.__baud_rate = baud_rate
+        self.__serial_conn = None
+        self.__thread = None
+        self.__running = False
+        self.__recv_data_callback = recv_data_callback
         self.recv_data = None
 
     def connect(self):
         try:
-            self.serial_conn = serial.Serial(self.port, self.baud_rate)
-            self.running = True
-            self.thread = threading.Thread(target=self.read)
-            self.thread.start()
-            print("Connected to UBLOX on port", self.port)
+            self.__serial_conn = serial.Serial(self.__port, self.__baud_rate)
+            self.__running = True
+            self.__thread = threading.Thread(target=self.__read)
+            self.__thread.start()
+            print("Connected to UBLOX on port", self.__port)
         except serial.SerialException as e:
-            print("Error connecting to serial port:", e)
-            self.running = False
+            print("Error ublox serial connection: ", f"connect: {e}")
+            self.__running = False
 
-    def read(self):
-        if self.serial_conn and self.serial_conn.in_waiting > 0:
-            try:
-                self.recv_data = self.serial_conn.readline()
-            except serial.SerialException as e:
-                print("Error reading from serial port:", e)
-                self.disconnect()
+    def __read(self):
+        while self.__running:
+            if self.__serial_conn and self.__serial_conn.in_waiting > 0:
+                try:
+                    self.recv_data = self.__serial_conn.readline()
+                    if self.__recv_data_callback:
+                        self.__recv_data_callback(self.recv_data)
+                except serial.SerialException as e:
+                    print("Error ublox serial connection: ", f"__read: {e}")
+                    self.disconnect()
 
     def disconnect(self):
-        self.running = False
-        if self.thread :
-            self.thread.join()
-        if self.serial_conn:
-            self.serial_conn.close()
-            print("Disconnected from UBLOX")
+        self.__running = False
+        if self.__thread:
+            self.__thread.join()
+        if self.__serial_conn:
+            self.__serial_conn.close()
 
     def write(self, data):
-        if self.serial_conn and self.serial_conn.is_open:
+        if self.__serial_conn and self.__serial_conn.is_open:
             try:
-                self.serial_conn.write(data.encode('utf-8'))
+                self.__serial_conn.write(data.encode('utf-8'))
             except serial.SerialException as e:
-                print("Error writing to serial port:", e)
+                print("Error ublox serial connection: ", f"write: {e}")
 
 
 # Example usage

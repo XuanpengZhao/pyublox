@@ -5,6 +5,10 @@ Description: This script is designed to store all ublox constants
 """
 
 class UbloxConst:
+    UBLOX_DEVICE = [
+            (0x1546, 0x01a8), # ublox: F9R
+            (0x1546, 0x01aa), # ublox: M8P
+    ]
     # header
     HEADER_NMEA = "$"
     HEADER_UBX = 0xB562  

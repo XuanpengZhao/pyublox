@@ -127,7 +127,7 @@ class UbloxUtils:
         return int_value
     
     @staticmethod
-    def find_usb_device(vendor_id, product_id):
+    def find_ublox_device(ublox_devices):
         """
         Searches connected USB devices and returns the port name of the device that matches the given vendor and product IDs.
 
@@ -140,10 +140,11 @@ class UbloxUtils:
         Returns:
             str or None: The name of the serial port if a matching device is found, otherwise None.
         """
-        ports = serial.tools.list_ports.comports()
-        for port in ports:
-            if port.vid == vendor_id and port.pid == product_id:
-                return port.device
+        for vendor_id, product_id in ublox_devices:
+            ports = serial.tools.list_ports.comports()
+            for port in ports:
+                if port.vid == vendor_id and port.pid == product_id:
+                    return port.device
         return None
     
     @staticmethod
