@@ -11,15 +11,16 @@ class UBloxSerialConnection:
         self.port = port
         self.baud_rate = baud_rate
         self.serial_conn = None
-        self.read_thread = None
+        self.thread  = None
         self.running = False
+        self.recv_data = None
 
     def connect(self):
         try:
             self.serial_conn = serial.Serial(self.port, self.baud_rate)
             self.running = True
-            self.read_thread = threading.Thread(target=self.read)
-            self.read_thread.start()
+            self.thread = threading.Thread(target=self.read)
+            self.thread.start()
             print("Connected to UBLOX on port", self.port)
         except serial.SerialException as e:
             print("Error connecting to serial port:", e)
@@ -28,18 +29,15 @@ class UBloxSerialConnection:
     def read(self):
         if self.serial_conn and self.serial_conn.in_waiting > 0:
             try:
-                #data = self.serial_conn.readline().decode('utf-8').rstrip()
-                data = self.serial_conn.readline()
-                return data
+                self.recv_data = self.serial_conn.readline()
             except serial.SerialException as e:
                 print("Error reading from serial port:", e)
                 self.disconnect()
-        return None
 
     def disconnect(self):
         self.running = False
-        if self.read_thread:
-            self.read_thread.join()
+        if self.thread :
+            self.thread.join()
         if self.serial_conn:
             self.serial_conn.close()
             print("Disconnected from UBLOX")

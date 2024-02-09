@@ -35,29 +35,34 @@ class UBXDecoder:
             self.GyroX = None
             self.GyroY = None
             self.GyroZ = None
+
         def decode(self, recv_data):
             # num_means is at recv_data[11] and only use the first 5 bits
             num_meas = (recv_data[11] & 0xF8) >> 3
-            for i in range(num_meas):
-                # data is composed of 4 bytes and first 3 is data field and last one is data type
-                data = recv_data[6 + 8 + i * 4 : 6 + 8 + i * 4 + 4]
-                data_field = int(UbloxUtils.inverse_bytes_to_hex(data[0:3]), 16)
-                data_type = data[3] & 0x3F
-                
-                if data_type == 14:
-                    self.GyroX = data_field / UbloxConst.DENOM
-                elif data_type == 13:
-                    self.GyroY = data_field / UbloxConst.DENOM
-                elif data_type == 5:
-                    self.GyroZ = data_field / UbloxConst.DENOM
-                elif data_type == 16:
-                    self.AccelX = data_field / UbloxConst.DENOM
-                elif data_type == 17:
-                    self.AccelY = data_field / UbloxConst.DENOM
-                elif data_type == 18:
-                    self.AccelZ = data_field / UbloxConst.DENOM
-                elif data_type == 0:
-                    print("UBX Decoder", "No data received")
+            checksum = UbloxUtils.ubx_checksum(recv_data)
+            if checksum == recv_data[-2:]:
+                for i in range(num_meas):
+                    # data is composed of 4 bytes and first 3 is data field and last one is data type
+                    data = recv_data[6 + 8 + i * 4 : 6 + 8 + i * 4 + 4]
+                    data_field = UbloxUtils.inverse_bytes_to_signed_decimal(data[0:3])
+                    data_type = data[3] & 0x3F
+                    
+                    if data_type == 14:
+                        self.GyroX = data_field / UbloxConst.DENOM
+                    elif data_type == 13:
+                        self.GyroY = data_field / UbloxConst.DENOM
+                    elif data_type == 5:
+                        self.GyroZ = data_field / UbloxConst.DENOM
+                    elif data_type == 16:
+                        self.AccelX = data_field / UbloxConst.DENOM
+                    elif data_type == 17:
+                        self.AccelY = data_field / UbloxConst.DENOM
+                    elif data_type == 18:
+                        self.AccelZ = data_field / UbloxConst.DENOM
+                    elif data_type == 0:
+                        print("UBX Decoder: ", "No data received")
+            else:
+                print("UBX Decoder: ", "Checksum error")
     class ALG:
         def __init__(self):
             self.yaw = None

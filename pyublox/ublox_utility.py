@@ -6,6 +6,8 @@ Description: This script is designed to create static utility functions for ublo
 import binascii
 from datetime import time
 import serial.tools.list_ports
+import configparser
+import math
 
 class UbloxUtils:
     @staticmethod
@@ -102,17 +104,27 @@ class UbloxUtils:
         return pos_mode_descriptions.get(pos_mode, "Unknown mode")
 
     @staticmethod
-    def inverse_bytes_to_hex(bytes):
+    def inverse_bytes_to_signed_decimal(bytes):
         """
-        Converts a byte array into its hexadecimal string representation, with bytes in reverse order.
+        Converts a byte array into its signed decimal representation, with bytes in reverse order.
 
         Args:
             bytes (bytes): A byte array to be converted.
 
         Returns:
-            str: The hexadecimal string representation of the reversed bytes.
+            int: The signed decimal representation of the reversed bytes.
         """
-        return binascii.hexlify(bytes[::-1]).decode('utf-8')
+        # Calculate the bit length of the byte array
+        bit_length = len(bytes) * 8
+
+        # Convert bytes to an integer
+        int_value = int(binascii.hexlify(bytes[::-1]).decode('utf-8'), 16)
+
+        # Check if the highest bit (sign bit) is set
+        if int_value & (1 << (bit_length - 1)):
+            int_value -= 1 << bit_length
+
+        return int_value
     
     @staticmethod
     def find_usb_device(vendor_id, product_id):
@@ -133,3 +145,54 @@ class UbloxUtils:
             if port.vid == vendor_id and port.pid == product_id:
                 return port.device
         return None
+    
+    @staticmethod
+    def ubx_checksum(recv_data):
+        """
+        Calculates the UBX checksum for a given message.
+
+        Args:
+            recv_data (bytes): The UBX message data including header and checksum. 
+                               The checksum needs to be calculated on the payload, 
+                               excluding the header and existing checksum bytes.
+
+        Returns:
+            bytes: A two-byte checksum calculated from the payload of the UBX message.
+        """
+        payload = recv_data[2:-2]
+        CK_A = 0
+        CK_B = 0
+        for buffer in payload:
+            CK_A = (CK_A + buffer) & 0xFF  # Ensure it stays within 8 bits
+            CK_B = (CK_B + CK_A) & 0xFF  # Ensure it stays within 8 bits
+
+        return bytes([CK_A, CK_B])
+    
+    @staticmethod
+    def read_credentials(file_path):
+        config = configparser.ConfigParser()
+        config.read(file_path)
+
+        return {
+            'host': config['DEFAULT']['host'],
+            'port': int(config['DEFAULT']['port']),
+            'username': config['DEFAULT']['username'],
+            'password': config['DEFAULT']['password'],
+        }
+    
+    @staticmethod
+    def haversine(lat1, lon1, lat2, lon2):
+        """
+        Calculate the great circle distance in kilometers between two points 
+        on the earth (specified in decimal degrees)
+        """
+        # Convert decimal degrees to radians 
+        lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+
+        # Haversine formula 
+        dlon = lon2 - lon1 
+        dlat = lat2 - lat1 
+        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+        c = 2 * math.asin(math.sqrt(a)) 
+        r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+        return c * r
