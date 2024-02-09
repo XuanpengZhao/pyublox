@@ -23,15 +23,15 @@ class PythonUblox:
         
         self.nmea_reader = NMEAReader()
         self.ubx_decoder = UBXDecoder()
-        # self.__device_port = UbloxUtils.find_ublox_device(UbloxConst.UBLOX_DEVICE)
-        # if self.__device_port is None:
-        #     print("Device not found")
-        # else:
-        #     # Default device_port
-        #     self.__device_port = device_port
+        self.__device_port = UbloxUtils.find_ublox_device(UbloxConst.UBLOX_DEVICE)
+        if self.__device_port is None:
+            print("Device not found")
+        else:
+            # Default device_port
+            self.__device_port = device_port
         
-        # self.ublox_connection = UBloxSerialConnection(self.__device_port, self.__baud_rate, self.ublox_recv_data_callback)
-        # self.ublox_connection.connect()
+        self.ublox_connection = UBloxSerialConnection(self.__device_port, self.__baud_rate, self.ublox_recv_data_callback)
+        self.ublox_connection.connect()
         
         # Enable RTK
         if self.__enable_RTK:
