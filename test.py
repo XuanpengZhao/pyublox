@@ -4,7 +4,6 @@ from pyublox.ubx_decoder import UBXDecoder
 from pyublox.nmea_reader import NMEAReader
 from pyublox.ublox_constants import UbloxConst
 from pyublox.ublox_utility import UbloxUtils
-import base64
 
 def main():
     # Replace with the actual serial port and baud rate
