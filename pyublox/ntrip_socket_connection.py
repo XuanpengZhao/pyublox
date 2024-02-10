@@ -68,7 +68,7 @@ class NTRIPSocketConnection:
         if self.__running and self.__socket:
             recv_data = self.__socket.recv(self.__buffersize)
             # b'SOURCETABLE 200 OK\r\nServer: NTRIP BKG Caster 2.0.45/2.0\r\nDate: Fri, 09 Feb 2024 22:56:27 GMT\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 173416\r\n\r\n'
-            if (b"SOURCETABLE 200 OK") in self.recv_data:
+            if (b"SOURCETABLE 200 OK") in recv_data:
                 recv_data = self.__socket.recv(self.__buffersize)
             else:
                 print("Error NTRIP socket connection: ", "Failed to receive SOURCETABLE 200 OK")
