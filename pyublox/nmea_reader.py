@@ -59,7 +59,7 @@ class NMEAReader:
                 self.lat = UbloxUtils.convert_to_decimal_degrees(data_fields[2], self.NS)
                 self.EW = data_fields[5]
                 self.lon = UbloxUtils.convert_to_decimal_degrees(data_fields[4], self.EW)
-                self.quality = UbloxUtils.get_quality_description(data_fields[6])
+                self.quality = UbloxUtils.get_quality(data_fields[6])
                 self.numSV = data_fields[7]
                 self.HDOP = data_fields[8]
                 self.alt = data_fields[9]

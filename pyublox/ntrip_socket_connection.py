@@ -27,6 +27,7 @@ class NTRIPSocketConnection:
             self.__running = True
             self.__send_auth_request()
             self.recv_data = self.__socket.recv(self.__buffersize)
+            # b'ICY 200 OK\r\n\r\n'
             if (b"ICY 200 OK") in self.recv_data:
                 self.__thread = threading.Thread(target=self.__read)
                 self.__thread.start()
