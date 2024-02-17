@@ -25,8 +25,8 @@ def main():
                 python_ublox.ubx.decode(data)
                 ### Write code here ###
 
-                # if self.nmea_reader.vtg.cog_mag:
-                #     print(self.nmea_reader.vtg.cog_mag) # heading
+                # if self.nmea.vtg.cog_mag:
+                #     print(self.nmea.vtg.cog_mag) # heading
                  
                 ### --------------- ###
     python_ublox = PythonUblox(credential=credential, ublox_recv_data_callback=ublox_recv_data_callback)
