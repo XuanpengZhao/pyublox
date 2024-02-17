@@ -33,7 +33,7 @@ class UBloxSerialConnection:
                 try:
                     self.recv_data = self.__serial_conn.readline()
                     if self.__recv_data_callback:
-                        self.__recv_data_callback(self.recv_data)
+                        self.__recv_data_callback(self)
                 except serial.SerialException as e:
                     print("Error ublox serial connection: ", f"__read: {e}")
                     self.disconnect()

@@ -4,7 +4,7 @@ import threading
 from pyublox.ublox_utility import UbloxUtils
 
 class NTRIPSocketConnection:
-    def __init__(self, host, port, username, password, ublox_connection, buffersize=65536, recv_data_callback=None):
+    def __init__(self, host, port, username, password, ublox_connection, mountpoint=None, buffersize=65536, recv_data_callback=None):
         self.__host = host
         self.__port = port
         self.__username = username
@@ -16,7 +16,7 @@ class NTRIPSocketConnection:
         self.__recv_data_callback = recv_data_callback
         self.__ublox_connection = ublox_connection
         self.recv_data = None
-        self.mountpoint = None # '7ODM_RTCM3'
+        self.mountpoint = mountpoint # '7ODM_RTCM3'
         self.closest_ntrip_source = None
         self.ntrip_sources_list = None
 
@@ -37,7 +37,7 @@ class NTRIPSocketConnection:
             print("Error NTRIP socket connection: ", f"connect: {e}")
             self.__running = False
 
-    def find_closest_ntrip_source(self, my_lat, my_lon):
+    def find_mountpoint(self, my_lat, my_lon):
         self.__get_ntrip_sources_list()
         closest_source = None
         min_distance = float('inf')
