@@ -13,14 +13,13 @@ from pyublox.ntrip_socket_connection import NTRIPSocketConnection
 import threading
 
 class PythonUblox:
-    def __init__(self, baud_rate=38400, device_port=None, enable_RTK=False, credential=None, mountpoint=None, ublox_recv_data_callback=None):
+    def __init__(self, baud_rate=38400, device_port=None, enable_RTK=False, credential=None, mountpoint=None):
         if enable_RTK and credential is None:
             raise ValueError("Credentials must be provided when RTK is enabled.")
         self.__baud_rate = baud_rate
         self.__enable_RTK = enable_RTK
         self.__device_port = device_port # device_port Example: "COM3" on Windows or "/dev/ttyUSB0" on Linux
         self.__trying_enable_RTK_thread = None
-        self.__ublox_recv_data_callback = ublox_recv_data_callback
         self.__credential = credential
         self.__mountpoint = mountpoint
         self.ntrip_connection = None
@@ -33,10 +32,8 @@ class PythonUblox:
             self.__device_port = UbloxUtils.find_ublox_device(UbloxConst.UBLOX_DEVICE)
         if self.__device_port is None:
             raise ValueError("No Device found.")
-        if self.__ublox_recv_data_callback is not None:
-            self.__ublox_recv_data_callback(self)
         
-        self.ublox_connection = UBloxSerialConnection(self.__device_port, self.__baud_rate, self.__ublox_recv_data_callback)
+        self.ublox_connection = UBloxSerialConnection(self.__device_port, self.__baud_rate)
         self.ublox_connection.connect()
 
          
@@ -45,6 +42,9 @@ class PythonUblox:
         if self.__enable_RTK:
             self.__trying_enable_RTK_thread = threading.Thread(target=self.__create_ntrip_connection)
             self.__trying_enable_RTK_thread.start()
+    
+    def set_ublox_callback(self, callback):
+        self.ublox_connection.set_callback(callback=callback)
 
     def __create_ntrip_connection(self):
         self.ntrip_connection = NTRIPSocketConnection(self.__credential["host"], self.__credential["port"], self.__credential["username"], self.__credential["password"], self.ublox_connection, mountpoint=self.__mountpoint)

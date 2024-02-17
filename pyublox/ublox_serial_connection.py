@@ -7,13 +7,13 @@ import serial
 import threading
 
 class UBloxSerialConnection:
-    def __init__(self, port, baud_rate=38400, recv_data_callback=None):
+    def __init__(self, port, baud_rate=38400):
         self.__port = port
         self.__baud_rate = baud_rate
         self.__serial_conn = None
         self.__thread = None
         self.__running = False
-        self.__recv_data_callback = recv_data_callback
+        self.__recv_data_callback = None
         self.recv_data = None
 
     def connect(self):
@@ -52,6 +52,8 @@ class UBloxSerialConnection:
             except serial.SerialException as e:
                 print("Error ublox serial connection: ", f"write: {e}")
 
+    def set_callback(self, callback):
+        self.__recv_data_callback = callback
 
 # Example usage
 if __name__ == "__main__":

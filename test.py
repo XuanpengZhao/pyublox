@@ -10,26 +10,27 @@ from pyublox.ublox_constants import UbloxConst
 from pyublox.ublox_serial_connection import UBloxSerialConnection
 
 
-def main():
+class main:
 
-    credential = UbloxUtils.read_credentials(".\credentials.ini")
-    def ublox_recv_data_callback(instance):
-        global python_ublox
-        if isinstance(instance, PythonUblox):
-            python_ublox = instance
-        if isinstance(instance, UBloxSerialConnection):
-            data = instance.recv_data
-            if data[0] == UbloxConst.HEADER_NMEA:
-                python_ublox.nmea.decode(data)
-            if (data[0] << 8 | data[1]) == UbloxConst.HEADER_UBX:
-                python_ublox.ubx.decode(data)
-                ### Write code here ###
+    def __init__(self):
+        
 
-                # if self.nmea.vtg.cog_mag:
-                #     print(self.nmea.vtg.cog_mag) # heading
-                 
-                ### --------------- ###
-    python_ublox = PythonUblox(credential=credential, ublox_recv_data_callback=ublox_recv_data_callback)
+        credential = UbloxUtils.read_credentials(".\credentials.ini")
+        self.python_ublox = PythonUblox(credential=credential)
+        self.python_ublox.set_ublox_callback(callback=self.ublox_recv_data_callback)
+
+    def ublox_recv_data_callback(self, data):
+        if data[0] == UbloxConst.HEADER_NMEA:
+            self.python_ublox.nmea.decode(data)
+        if (data[0] << 8 | data[1]) == UbloxConst.HEADER_UBX:
+            self.python_ublox.ubx.decode(data)
+            ### Write code here ###
+
+            # if self.nmea.vtg.cog_mag:
+            #     print(self.nmea.vtg.cog_mag) # heading
+                
+            ### --------------- ###
+
 
 if __name__ == '__main__':
     main()
