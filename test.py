@@ -22,14 +22,18 @@ class main:
     def ublox_recv_data_callback(self, data):
         if data[0] == UbloxConst.HEADER_NMEA:
             self.python_ublox.nmea.decode(data)
-        if (data[0] << 8 | data[1]) == UbloxConst.HEADER_UBX:
+        elif (data[0] << 8 | data[1]) == UbloxConst.HEADER_UBX:
             self.python_ublox.ubx.decode(data)
+            
+            print(self.python_ublox.nmea.gga.quality)
             ### Write code here ###
 
-            # if self.nmea.vtg.cog_mag:
-            #     print(self.nmea.vtg.cog_mag) # heading
+            # if self.python_ublox.nmea.vtg.cog_mag:
+            #     print(self.python_ublox.nmea.vtg.cog_mag) # heading
                 
             ### --------------- ###
+        else:
+            print("Unknown data: ", data)
 
 
 if __name__ == '__main__':

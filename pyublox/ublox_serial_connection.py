@@ -1,6 +1,6 @@
 """
 author: Xuanpeng Zhao
-Date: Feb 07 2024lf.__password
+Date: Feb 07 2024 
 Description: This script is designed to create serial connection to ubloxs
 """
 import serial
@@ -14,7 +14,7 @@ class UBloxSerialConnection:
         self.__thread = None
         self.__running = False
         self.__recv_data_callback = None
-        self.recv_data = None
+        self.__recv_data = None
 
     def connect(self):
         try:
@@ -31,9 +31,9 @@ class UBloxSerialConnection:
         while self.__running:
             if self.__serial_conn and self.__serial_conn.in_waiting > 0:
                 try:
-                    self.recv_data = self.__serial_conn.readline()
+                    self.__recv_data = self.__serial_conn.readline()
                     if self.__recv_data_callback:
-                        self.__recv_data_callback(self)
+                        self.__recv_data_callback(self.__recv_data)
                 except serial.SerialException as e:
                     print("Error ublox serial connection: ", f"__read: {e}")
                     self.disconnect()

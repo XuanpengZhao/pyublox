@@ -1,3 +1,9 @@
+"""
+author: Xuanpeng Zhao
+Date: Feb 07 2024 
+Description: This script is designed to create socket connection to basestation to retreive RTCM
+"""
+
 import socket
 import base64
 import threading
@@ -15,10 +21,11 @@ class NTRIPSocketConnection:
         self.__thread = None
         self.__recv_data_callback = recv_data_callback
         self.__ublox_connection = ublox_connection
-        self.recv_data = None
-        self.mountpoint = mountpoint # '7ODM_RTCM3'
-        self.closest_ntrip_source = None
-        self.ntrip_sources_list = None
+        self.__ntrip_sources_list = None
+        self.__mountpoint = mountpoint # '7ODM_RTCM3'
+        self.__recv_data = None
+         
+         
 
     def connect(self):
         try:
@@ -26,9 +33,9 @@ class NTRIPSocketConnection:
             self.__socket.connect((self.__host, self.__port))
             self.__running = True
             self.__send_auth_request()
-            self.recv_data = self.__socket.recv(self.__buffersize)
+            self.__recv_data = self.__socket.recv(self.__buffersize)
             # b'ICY 200 OK\r\n\r\n'
-            if (b"ICY 200 OK") in self.recv_data:
+            if (b"ICY 200 OK") in self.__recv_data:
                 self.__thread = threading.Thread(target=self.__read)
                 self.__thread.start()
             else:
@@ -41,7 +48,7 @@ class NTRIPSocketConnection:
         self.__get_ntrip_sources_list()
         closest_source = None
         min_distance = float('inf')
-        for source in self.ntrip_sources_list:
+        for source in self.__ntrip_sources_list:
             if source.startswith('STR;'):
                 sourceInfo = source.split(';')
                 if len(sourceInfo) > 11:
@@ -53,7 +60,7 @@ class NTRIPSocketConnection:
                         min_distance = distance
                         closest_source = sourceInfo
         self.ntrip_source = closest_source
-        self.mountpoint = self.ntrip_source[1]
+        self.__mountpoint = self.ntrip_source[1]
         return self.ntrip_source
             
     def __get_ntrip_sources_list(self):
@@ -66,19 +73,19 @@ class NTRIPSocketConnection:
                    f"Connection: close\r\n\r\n")
         self.__socket.sendall(request.encode())
         if self.__running and self.__socket:
-            recv_data = self.__socket.recv(self.__buffersize)
+            __recv_data = self.__socket.recv(self.__buffersize)
             # b'SOURCETABLE 200 OK\r\nServer: NTRIP BKG Caster 2.0.45/2.0\r\nDate: Fri, 09 Feb 2024 22:56:27 GMT\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 173416\r\n\r\n'
-            if (b"SOURCETABLE 200 OK") in recv_data:
-                recv_data = self.__socket.recv(self.__buffersize)
+            if (b"SOURCETABLE 200 OK") in __recv_data:
+                __recv_data = self.__socket.recv(self.__buffersize)
             else:
                 print("Error NTRIP socket connection: ", "Failed to receive SOURCETABLE 200 OK")
-        decoded_data = recv_data.decode('utf-8')
-        self.ntrip_sources_list = decoded_data.split('\r\n')
+        decoded_data = __recv_data.decode('utf-8')
+        self.__ntrip_sources_list = decoded_data.split('\r\n')
         self.disconnect()
 
     def __send_auth_request(self):
         auth_token = base64.b64encode(f"{self.__username}:{self.__password}".encode()).decode()
-        request = (f"GET /{self.mountpoint} HTTP/1.1\r\n"
+        request = (f"GET /{self.__mountpoint} HTTP/1.1\r\n"
                    f"User-Agent: NTRIP PythonClient/1.0\r\n"
                    f"Accept: */*\r\n"
                    f"Connection: close\r\n"
@@ -90,10 +97,10 @@ class NTRIPSocketConnection:
         while self.__running:
             if self.__socket:
                 try:
-                    self.recv_data = self.__socket.recv(self.__buffersize)
-                    self.__ublox_connection.write(self.recv_data)
+                    self.__recv_data = self.__socket.recv(self.__buffersize)
+                    self.__ublox_connection.write(self.__recv_data)
                     if self.__recv_data_callback:
-                        self.__recv_data_callback(self.recv_data)
+                        self.__recv_data_callback(self.__recv_data)
                 except Exception as e:
                     print("Error NTRIP socket connection: ", f"__read: {e}")
                     self.disconnect()
