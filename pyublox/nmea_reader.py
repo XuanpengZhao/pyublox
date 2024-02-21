@@ -8,33 +8,24 @@ from pyublox.ublox_constants import UbloxConst
 
 class NMEAReader:
 
-    HEADER_NMEA = "$"
-    # Talker ID
-    TID_GPS_SBAS = "GP"
-    TID_GLONASS = "GL"
-    TID_Galileo = "GA"
-    TID_BeiDou = "GB"
-    TID_QZSS = "GQ"
-    TID_ANY = "GN" # combine of any
-    # Sentence Formatter
-    SF_GGA = "GGA" # Global positioning system fix data
-    SF_VTG = "VTG" # Course over ground and ground speed
-
     def __init__(self):
         self.gga = self.GGA()
         self.vtg = self.VTG()
 
     def decode(self, recv_data):
-        header = recv_data[0]
+        header = recv_data[0:2]
         talker_ID = recv_data[1:3]
         sentence_formatter = recv_data[3:6]
         if header == UbloxConst.HEADER_NMEA:
-            decoded_data = recv_data.decode('utf-8')
-            data_fields = decoded_data.split(",")
-            if sentence_formatter == UbloxConst.SF_GGA:
-                self.gga.decode(data_fields)
-            if sentence_formatter == UbloxConst.SF_VTG:
-                self.vtg.decode(data_fields)
+            try:
+                decoded_data = recv_data.decode('utf-8')
+                data_fields = decoded_data.split(",")
+                if sentence_formatter == UbloxConst.SF_GGA:
+                    self.gga.decode(data_fields)
+                if sentence_formatter == UbloxConst.SF_VTG:
+                    self.vtg.decode(data_fields)
+            except:
+                print("NMEA_Reader: ", f"Error decoding data: {recv_data}")
         else:
             print("Wrong input for NMEA reader")
 

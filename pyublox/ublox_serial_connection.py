@@ -15,6 +15,8 @@ class UBloxSerialConnection:
         self.__running = False
         self.__recv_data_callback = None
         self.__recv_data = None
+        self.__buffer = bytearray()
+        
 
     def connect(self):
         try:
@@ -31,9 +33,17 @@ class UBloxSerialConnection:
         while self.__running:
             if self.__serial_conn and self.__serial_conn.in_waiting > 0:
                 try:
-                    self.__recv_data = self.__serial_conn.readline()
-                    if self.__recv_data_callback:
-                        self.__recv_data_callback(self.__recv_data)
+                    byte = self.__serial_conn.read(1)
+                    if byte is None:
+                        continue
+                    self.__buffer += byte
+                    if len(self.__buffer) > 1 and (self.__buffer[-2:] == b'\xb5\x62' or self.__buffer[-2:] == b'$G'):
+                        # Process the current packet, excluding the last 2 bytes
+                        self.__recv_data = self.__buffer[:-2]
+                        if self.__recv_data_callback:
+                            self.__recv_data_callback(self.__recv_data)
+                        # Start new buffer with the beginning of the next packet
+                        self.__buffer = self.__buffer[-2:]
                 except serial.SerialException as e:
                     print("Error ublox serial connection: ", f"__read: {e}")
                     self.disconnect()

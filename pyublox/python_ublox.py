@@ -42,10 +42,10 @@ class PythonUblox:
             self.__trying_enable_RTK_thread.start()
     
     def set_ublox_callback(self, callback):
-        self.ublox_connection.set_callback(callback=callback)
+        self.__ublox_connection.set_callback(callback=callback)
 
     def __create_ntrip_connection(self):
-        self.__ntrip_connection = NTRIPSocketConnection(self.__credential["host"], self.__credential["port"], self.__credential["username"], self.__credential["password"], self.ublox_connection, mountpoint=self.__mountpoint)
+        self.__ntrip_connection = NTRIPSocketConnection(self.__credential["host"], self.__credential["port"], self.__credential["username"], self.__credential["password"], self.__ublox_connection, mountpoint=self.__mountpoint)
         if self.__mountpoint is None:
             elapsed_time = 0
             while self.nmea.gga.lat is None and self.nmea.gga.lon is None:
