@@ -76,9 +76,9 @@ class UBXDecoder:
         def decode(self, recv_data):
             if len(recv_data) > 22:
                 data = recv_data[6 + 8: 6 + 8 + 8]
-                self.yaw =  int(UbloxUtils.inverse_bytes_to_hex(data[0:4]), 16) / UbloxConst.DENOM
-                self.pitch =  int(UbloxUtils.inverse_bytes_to_hex(data[4:6]), 16) / UbloxConst.DENOM
-                self.roll =  int(UbloxUtils.inverse_bytes_to_hex(data[6:8]), 16) / UbloxConst.DENOM   
+                self.yaw =  int(UbloxUtils.inverse_bytes_to_signed_decimal(data[0:4]), 16) / UbloxConst.DENOM
+                self.pitch =  int(UbloxUtils.inverse_bytes_to_signed_decimal(data[4:6]), 16) / UbloxConst.DENOM
+                self.roll =  int(UbloxUtils.inverse_bytes_to_signed_decimal(data[6:8]), 16) / UbloxConst.DENOM   
             else:     
                 print("UBX Decoder: ", "ALG: ", "recv_data length not enough: ", recv_data) 
 

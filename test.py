@@ -14,8 +14,8 @@ class main:
     def __init__(self):
         
 
-        credential = UbloxUtils.read_credentials(".\credentials.ini")
-        self.python_ublox = PythonUblox(credential=credential)
+        # credential = UbloxUtils.read_credentials(".\credentials.ini")
+        self.python_ublox = PythonUblox()
         self.python_ublox.set_ublox_callback(callback=self.ublox_recv_data_callback)
 
     def ublox_recv_data_callback(self, data):
