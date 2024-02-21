@@ -18,12 +18,10 @@ class UBXDecoder:
             msg_class = recv_data[2] # recvData[2] is the class
             msg_ID = recv_data[3] # recvData[3] is the ID
             if header == UbloxConst.HEADER_UBX:
-                if msg_class == 16:
+                if msg_class == UbloxConst.CLASS_ESF:
                     if msg_ID == UbloxConst.ID_MEAS:
                         self.meas.decode(recv_data)
-
                     if msg_ID == UbloxConst.ID_ALG:
-                        #print("Received data:", recv_data)
                         self.alg.decode(recv_data)
             else:
                 print("Wrong input for UBX decoder")
@@ -51,17 +49,17 @@ class UBXDecoder:
                         data_field = UbloxUtils.inverse_bytes_to_signed_decimal(data[0:3])
                         data_type = data[3] & 0x3F
                         if data_type == 14:
-                            self.GyroX = data_field / UbloxConst.DENOM
+                            self.GyroX = data_field / UbloxConst.D1024
                         elif data_type == 13:
-                            self.GyroY = data_field / UbloxConst.DENOM
+                            self.GyroY = data_field / UbloxConst.D1024
                         elif data_type == 5:
-                            self.GyroZ = data_field / UbloxConst.DENOM
+                            self.GyroZ = data_field / UbloxConst.D1024
                         elif data_type == 16:
-                            self.AccelX = data_field / UbloxConst.DENOM
+                            self.AccelX = data_field / UbloxConst.D1024
                         elif data_type == 17:
-                            self.AccelY = data_field / UbloxConst.DENOM
+                            self.AccelY = data_field / UbloxConst.D1024
                         elif data_type == 18:
-                            self.AccelZ = data_field / UbloxConst.DENOM
+                            self.AccelZ = data_field / UbloxConst.D1024
                         elif data_type == 0:
                             print("UBX Decoder: ", "MEAS: ","No data received")
                 else:
@@ -76,9 +74,9 @@ class UBXDecoder:
         def decode(self, recv_data):
             if len(recv_data) > 22:
                 data = recv_data[6 + 8: 6 + 8 + 8]
-                self.yaw =  int(UbloxUtils.inverse_bytes_to_signed_decimal(data[0:4]), 16) / UbloxConst.DENOM
-                self.pitch =  int(UbloxUtils.inverse_bytes_to_signed_decimal(data[4:6]), 16) / UbloxConst.DENOM
-                self.roll =  int(UbloxUtils.inverse_bytes_to_signed_decimal(data[6:8]), 16) / UbloxConst.DENOM   
+                self.yaw = UbloxUtils.inverse_bytes_to_signed_decimal(data[0:4]) / UbloxConst.D100
+                self.pitch = UbloxUtils.inverse_bytes_to_signed_decimal(data[4:6]) / UbloxConst.D100
+                self.roll = UbloxUtils.inverse_bytes_to_signed_decimal(data[6:8]) / UbloxConst.D100   
             else:     
                 print("UBX Decoder: ", "ALG: ", "recv_data length not enough: ", recv_data) 
 

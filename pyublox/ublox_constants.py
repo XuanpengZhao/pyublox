@@ -23,7 +23,8 @@ class UbloxConst:
     SF_GGA = b"GGA" # Global positioning system fix data
     SF_VTG = b"VTG" # Course over ground and ground speed
 
-    DENOM = 1024
+    D1024 = 1024
+    D100 = 100
     CLASS_ESF = 0x10
     ID_MEAS = 0x02
     ID_ALG = 0x14

@@ -25,6 +25,8 @@ class UbloxUtils:
             str: The latitude or longitude in decimal degrees format as a string. 
                 For southern and western coordinates, this is a negative value.
         """
+        if not degrees_minutes:
+            return None
         degrees = int(degrees_minutes[:2])
         minutes = float(degrees_minutes[2:])
         decimal_degrees = degrees + minutes / 60
