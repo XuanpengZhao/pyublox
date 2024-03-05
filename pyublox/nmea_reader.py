@@ -24,11 +24,11 @@ class NMEAReader:
                     self.gga.decode(data_fields)
                 if sentence_formatter == UbloxConst.SF_VTG:
                     self.vtg.decode(data_fields)
-            except:
-                print("NMEA_Reader: ", f"Error decoding data: {recv_data}")
+            except Exception as e:
+                print("NMEA_Reader: ", e, f", Error decoding data: {recv_data}")
         else:
             print("Wrong input for NMEA reader")
-
+            
     class GGA:
         def __init__(self):
             self.time = None  # UTC time of the fix (hhmmss.ss format)
@@ -45,11 +45,11 @@ class NMEAReader:
             self.diffStation = None  # ID of station providing differential corrections (null when DGPS is not used)
         def decode(self, data_fields):
             if len(data_fields) >= 14:
-                self.time = UbloxUtils.convert_to_time(data_fields[1])
+                self.time = UbloxUtils.convert_HHMMSSsss_to_time(data_fields[1])
                 self.NS = data_fields[3]
-                self.lat = UbloxUtils.convert_to_decimal_degrees(data_fields[2], self.NS)
+                self.lat = UbloxUtils.convert_gps_to_decimal(data_fields[2], self.NS)
                 self.EW = data_fields[5]
-                self.lon = UbloxUtils.convert_to_decimal_degrees(data_fields[4], self.EW)
+                self.lon = UbloxUtils.convert_gps_to_decimal(data_fields[4], self.EW)
                 self.quality = UbloxUtils.get_quality(data_fields[6])
                 self.numSV = data_fields[7]
                 self.HDOP = data_fields[8]

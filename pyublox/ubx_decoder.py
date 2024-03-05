@@ -71,6 +71,7 @@ class UBXDecoder:
             self.yaw = None
             self.pitch = None
             self.roll = None
+            self.status = None
         def decode(self, recv_data):
             if len(recv_data) > 22:
                 data = recv_data[6 + 8: 6 + 8 + 8]

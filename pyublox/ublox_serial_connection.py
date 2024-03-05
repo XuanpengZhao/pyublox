@@ -5,6 +5,7 @@ Description: This script is designed to create serial connection to ubloxs
 """
 import serial
 import threading
+from pyublox.ublox_constants import UbloxConst
 
 class UBloxSerialConnection:
     def __init__(self, port, baud_rate=38400):
@@ -37,7 +38,7 @@ class UBloxSerialConnection:
                     if byte is None:
                         continue
                     self.__buffer += byte
-                    if len(self.__buffer) > 1 and (self.__buffer[-2:] == b'\xb5\x62' or self.__buffer[-2:] == b'$G'):
+                    if len(self.__buffer) > 1 and (self.__buffer[-2:] == UbloxConst.HEADER_UBX or self.__buffer[-2:] == UbloxConst.HEADER_NMEA):
                         # Process the current packet, excluding the last 2 bytes
                         self.__recv_data = self.__buffer[:-2]
                         if self.__recv_data_callback:

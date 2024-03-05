@@ -11,14 +11,15 @@ import math
 
 class UbloxUtils:
     @staticmethod
-    def convert_to_decimal_degrees(degrees_minutes, direction):
+    def convert_gps_to_decimal(degrees_minutes, direction):
         """
-        Converts geographic coordinates from degrees and decimal minutes (DDMM.MMMM) format 
+        Converts geographic coordinates from degrees and decimal minutes (DDMM.MMMMMM or DDDMM.MMMMMM) format 
         to decimal degrees format. This format is commonly used in GPS data.
 
         Args:
-            degrees_minutes (str): The latitude or longitude in DDMM.MMMM format. 
-                                For example, '4717.11399' represents 47 degrees and 17.11399 minutes.
+            degrees_minutes (str): The latitude (DDMM.MMMMMM) or longitude (DDDMM.MMMMMM) in degrees and decimal minutes format.
+                                For example, '3723.465877' for latitude (37 degrees and 23.465877 minutes).
+                                '12202.269578' for longitude (122 degrees and 02.269578 minutes).
             direction (str): One of 'N', 'S', 'E', 'W' indicating the hemisphere (North, South, East, West).
 
         Returns:
@@ -27,15 +28,28 @@ class UbloxUtils:
         """
         if not degrees_minutes:
             return None
-        degrees = int(degrees_minutes[:2])
-        minutes = float(degrees_minutes[2:])
+
+        # Determine if it's latitude or longitude based on the direction
+        if direction in ['N', 'S']:  # Latitude
+            degrees_length = 2
+        elif direction in ['E', 'W']:  # Longitude
+            degrees_length = 3
+        else:
+            raise ValueError("Invalid direction. Must be one of 'N', 'S', 'E', 'W'.")
+
+        degrees = int(degrees_minutes[:degrees_length])
+        minutes = float(degrees_minutes[degrees_length:])
+
         decimal_degrees = degrees + minutes / 60
+
         if direction in ['S', 'W']:
             decimal_degrees *= -1
+
         return str(decimal_degrees)
     
+    
     @staticmethod
-    def convert_to_time(time_str):
+    def convert_HHMMSSsss_to_time(time_str):
         """
         Converts a UTC time string into a datetime.time object. The input string
         should be in the format of 'HHMMSS.sss', where 'HH' is hours, 'MM' is minutes,

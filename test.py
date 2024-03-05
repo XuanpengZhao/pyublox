@@ -16,6 +16,7 @@ class main:
 
         # credential = UbloxUtils.read_credentials(".\credentials.ini")
         self.python_ublox = PythonUblox()
+        self.python_ublox.connect()
         self.python_ublox.set_ublox_callback(callback=self.ublox_recv_data_callback)
 
     def ublox_recv_data_callback(self, data):
@@ -27,6 +28,7 @@ class main:
                 print(self.python_ublox.nmea.gga.lat) # lat
                 print(self.python_ublox.nmea.gga.lon) # lon 
                 print(self.python_ublox.nmea.gga.alt) # lon   
+                print(self.python_ublox.nmea.gga.time) # time  
 
             elif data[0:2] == UbloxConst.HEADER_UBX:
                 pass
