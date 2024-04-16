@@ -11,6 +11,7 @@ from pyublox.ublox_constants import UbloxConst
 from pyublox.ublox_utility import UbloxUtils
 from pyublox.ntrip_socket_connection import NTRIPSocketConnection
 import threading
+import configparser
 
 class PythonUblox:
     def __init__(self):
@@ -34,7 +35,7 @@ class PythonUblox:
     def enable_RTK(self, credential, mountpoint=None):
         self.__mountpoint = mountpoint
         if credential:
-            self.__enable_RTK_thread = threading.Thread(target=self.__create_ntrip_connection)
+            self.__enable_RTK_thread = threading.Thread(target=self.__create_ntrip_connection, args=(credential,))
             self.__enable_RTK_thread.start()
         else:
             raise ValueError("Credentials must be provided when RTK is enabled.")
@@ -45,8 +46,8 @@ class PythonUblox:
         else:
             raise ValueError("Must connect ublox before set callback.")
 
-    def __create_ntrip_connection(self):
-        self.__ntrip_connection = NTRIPSocketConnection(self.__credential["host"], self.__credential["port"], self.__credential["username"], self.__credential["password"], self.__ublox_connection, mountpoint=self.__mountpoint)
+    def __create_ntrip_connection(self, credential):
+        self.__ntrip_connection = NTRIPSocketConnection(credential["host"], credential["port"], credential["username"], credential["password"], self.__ublox_connection, mountpoint=self.__mountpoint)
         if self.__mountpoint is None:
             elapsed_time = 0
             while self.nmea.gga.lat is None and self.nmea.gga.lon is None:

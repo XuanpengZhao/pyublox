@@ -191,10 +191,10 @@ class UbloxUtils:
         config.read(file_path)
 
         return {
-            'host': config['DEFAULT']['host'],
-            'port': int(config['DEFAULT']['port']),
-            'username': config['DEFAULT']['username'],
-            'password': config['DEFAULT']['password'],
+            'host': config['Credentials']['host'],
+            'port': int(config['Credentials']['port']),
+            'username': config['Credentials']['username'],
+            'password': config['Credentials']['password'],
         }
     
     @staticmethod
