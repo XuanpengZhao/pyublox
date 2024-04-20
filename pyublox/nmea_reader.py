@@ -19,13 +19,18 @@ class NMEAReader:
         if header == UbloxConst.HEADER_NMEA:
             try:
                 decoded_data = recv_data.decode('utf-8')
-                data_fields = decoded_data.split(",")
-                if sentence_formatter == UbloxConst.SF_GGA:
-                    self.gga.decode(data_fields)
-                if sentence_formatter == UbloxConst.SF_VTG:
-                    self.vtg.decode(data_fields)
+                checksum = UbloxUtils.nmea_checksum(decoded_data)
+                if checksum == decoded_data[decoded_data.find('*')+1:].strip():
+                    sentence = decoded_data[:decoded_data.find('*')]
+                    data_fields = sentence.split(",")
+                    if sentence_formatter == UbloxConst.SF_GGA:
+                        self.gga.decode(data_fields)
+                    if sentence_formatter == UbloxConst.SF_VTG:
+                        self.vtg.decode(data_fields)
+                else:
+                    print("NMEA Reader: ", "", "Checksum error: ", decoded_data)
             except Exception as e:
-                print("NMEA_Reader: ", e, f", Error decoding data: {recv_data}")
+                print("NMEA Reader: ", e, f", Error decoding data: {recv_data}")
         else:
             print("Wrong input for NMEA reader")
             

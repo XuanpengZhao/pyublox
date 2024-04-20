@@ -13,23 +13,24 @@ class main:
 
     def __init__(self):
         
+        credential = UbloxUtils.read_credentials(".\credentials.ini", tag="UCR")
+        self.python_ublox = PythonUblox()
+        self.python_ublox.connect()
+        self.python_ublox.set_ublox_callback(callback=self.ublox_recv_data_callback)
+        self.python_ublox.enable_RTK(credential, mountpoint="U-BLOX")
 
-        credential = UbloxUtils.read_credentials(r".\credentials.ini")
-        # self.python_ublox = PythonUblox()
-        # self.python_ublox.enable_RTK(credential)
-        # self.python_ublox.connect()
-        # self.python_ublox.set_ublox_callback(callback=self.ublox_recv_data_callback)
 
     def ublox_recv_data_callback(self, data):
         if len(data) > 1:
             if data[0:2] == UbloxConst.HEADER_NMEA:
                 self.python_ublox.nmea.decode(data)
-                # print(self.python_ublox.nmea.gga.quality)
-                print(self.python_ublox.nmea.vtg.cog_mag) # heading
+                # print(self.python_ublox.nmea.vtg.cog_mag) # heading
                 print(self.python_ublox.nmea.gga.lat) # lat
                 print(self.python_ublox.nmea.gga.lon) # lon 
                 print(self.python_ublox.nmea.gga.alt) # lon   
                 print(self.python_ublox.nmea.gga.time) # time  
+                print(self.python_ublox.nmea.gga.quality)
+                print(self.python_ublox.nmea.gga.numSV)
 
             elif data[0:2] == UbloxConst.HEADER_UBX:
                 pass

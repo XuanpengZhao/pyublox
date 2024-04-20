@@ -33,6 +33,7 @@ class NTRIPSocketConnection:
             self.__socket.connect((self.__host, self.__port))
             self.__running = True
             self.__send_auth_request()
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             self.__recv_data = self.__socket.recv(self.__buffersize)
             # b'ICY 200 OK\r\n\r\n'
             if (b"ICY 200 OK") in self.__recv_data:
@@ -81,7 +82,9 @@ class NTRIPSocketConnection:
                 print("Error NTRIP socket connection: ", "Failed to receive SOURCETABLE 200 OK")
         decoded_data = __recv_data.decode('utf-8')
         self.__ntrip_sources_list = decoded_data.split('\r\n')
-        self.disconnect()
+        self.__running = False
+        if self.__socket:
+            self.__socket.close()
 
     def __send_auth_request(self):
         auth_token = base64.b64encode(f"{self.__username}:{self.__password}".encode()).decode()
@@ -91,6 +94,7 @@ class NTRIPSocketConnection:
                    f"Connection: close\r\n"
                    f"Ntrip-GGA: \r\n"
                    f"Authorization: Basic {auth_token}\r\n\r\n")
+        print(request)
         self.__socket.sendall(request.encode())
 
     def __read(self):
@@ -109,6 +113,6 @@ class NTRIPSocketConnection:
         self.__running = False
         if self.__socket:
             self.__socket.close()
-            print("Disconnected from NTRIP caster.")
+            print("Disconnected from NTRIP server.")
         if self.__thread:
             self.__thread.join()

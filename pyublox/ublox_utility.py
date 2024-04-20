@@ -45,7 +45,7 @@ class UbloxUtils:
         if direction in ['S', 'W']:
             decimal_degrees *= -1
 
-        return str(decimal_degrees)
+        return decimal_degrees
     
     
     @staticmethod
@@ -90,8 +90,8 @@ class UbloxUtils:
         """
         quality_descriptions = {
             0: "No fix",
-            1: "2D",
-            2: "3D",
+            1: "2D/3D fix",
+            2: "2D/3D fix",
             4: "RTK fixed",
             5: "RTK float",
             6: "DR fixed"
@@ -112,35 +112,12 @@ class UbloxUtils:
         pos_mode_descriptions = {
             'N': "No fix",
             'E': "DR fixed",
-            'A': "2D",
-            'D': "3D",
+            'A': "2D/3D fix",
+            'D': "2D/3D fix",
             'F': "RTK float",
             'R': "RTK fixed"
         }
         return pos_mode_descriptions.get(pos_mode, "Unknown mode")
-
-    @staticmethod
-    def inverse_bytes_to_signed_decimal(bytes):
-        """
-        Converts a byte array into its signed decimal representation, with bytes in reverse order.
-
-        Args:
-            bytes (bytes): A byte array to be converted.
-
-        Returns:
-            int: The signed decimal representation of the reversed bytes.
-        """
-        # Calculate the bit length of the byte array
-        bit_length = len(bytes) * 8
-
-        # Convert bytes to an integer
-        int_value = int(binascii.hexlify(bytes[::-1]).decode('utf-8'), 16)
-
-        # Check if the highest bit (sign bit) is set
-        if int_value & (1 << (bit_length - 1)):
-            int_value -= 1 << bit_length
-
-        return int_value
     
     @staticmethod
     def find_ublox_device(ublox_devices):
@@ -159,10 +136,36 @@ class UbloxUtils:
         for vendor_id, product_id in ublox_devices:
             ports = serial.tools.list_ports.comports()
             for port in ports:
+                # if port.vid:
+                #     print(hex(port.vid))
+                #     print(hex(port.pid))
                 if port.vid == vendor_id and port.pid == product_id:
                     return port.device
         return None
     
+    @staticmethod
+    def nmea_checksum(decoded_data):
+        """
+        Calculate the NMEA checksum for a given sentence.
+        
+        Args:
+            sentence (str): The NMEA sentence including the '$' and '*' but excluding the checksum itself.
+        
+        Returns:
+            str: The two-character hexadecimal checksum.
+        """
+        # Remove the '$' start character and the '*' before the checksum, if they exist
+        start_index = decoded_data.find('$') + 1
+        end_index = decoded_data.find('*') if '*' in decoded_data else len(decoded_data)
+        
+        # Calculate checksum by XORing all characters between '$' and '*'
+        checksum = 0
+        for char in decoded_data[start_index:end_index]:
+            checksum ^= ord(char)
+
+        # Convert the checksum to a two-character hexadecimal string
+        return format(checksum, '02X')
+
     @staticmethod
     def ubx_checksum(recv_data):
         """
@@ -186,15 +189,15 @@ class UbloxUtils:
         return bytes([CK_A, CK_B])
     
     @staticmethod
-    def read_credentials(file_path):
+    def read_credentials(file_path, tag="DEFAULT"):
         config = configparser.ConfigParser()
         config.read(file_path)
 
         return {
-            'host': config['Credentials']['host'],
-            'port': int(config['Credentials']['port']),
-            'username': config['Credentials']['username'],
-            'password': config['Credentials']['password'],
+            'host': config[tag]['host'],
+            'port': int(config[tag]['port']),
+            'username': config[tag]['username'],
+            'password': config[tag]['password'],
         }
     
     @staticmethod

@@ -8,6 +8,8 @@ class UbloxConst:
     UBLOX_DEVICE = [
             (0x1546, 0x01a9), # ublox: F9R
             (0x1546, 0x01aa), # ublox: M8P
+            (0x403, 0x6015) # ublox: F9P
+
     ]
     # header
     HEADER_NMEA = b"$G"

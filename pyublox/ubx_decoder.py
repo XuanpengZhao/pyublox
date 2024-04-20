@@ -46,7 +46,7 @@ class UBXDecoder:
                     for i in range(num_meas):
                         # data is composed of 4 bytes and first 3 is data field and last one is data type
                         data = recv_data[6 + 8 + i * 4 : 6 + 8 + i * 4 + 4]
-                        data_field = UbloxUtils.inverse_bytes_to_signed_decimal(data[0:3])
+                        data_field = int.from_bytes(data[0:3], byteorder='little', signed=True)
                         data_type = data[3] & 0x3F
                         if data_type == 14:
                             self.GyroX = data_field / UbloxConst.D1024
@@ -75,9 +75,9 @@ class UBXDecoder:
         def decode(self, recv_data):
             if len(recv_data) > 22:
                 data = recv_data[6 + 8: 6 + 8 + 8]
-                self.yaw = UbloxUtils.inverse_bytes_to_signed_decimal(data[0:4]) / UbloxConst.D100
-                self.pitch = UbloxUtils.inverse_bytes_to_signed_decimal(data[4:6]) / UbloxConst.D100
-                self.roll = UbloxUtils.inverse_bytes_to_signed_decimal(data[6:8]) / UbloxConst.D100   
+                self.yaw = int.from_bytes(data[0:4], byteorder='little', signed=True) / UbloxConst.D100
+                self.pitch = int.from_bytes(data[4:6], byteorder='little', signed=True) / UbloxConst.D100
+                self.roll = int.from_bytes(data[6:8], byteorder='little', signed=True) / UbloxConst.D100   
             else:     
                 print("UBX Decoder: ", "ALG: ", "recv_data length not enough: ", recv_data) 
 

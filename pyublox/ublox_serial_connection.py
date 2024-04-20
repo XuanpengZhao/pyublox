@@ -39,6 +39,10 @@ class UBloxSerialConnection:
                         continue
                     self.__buffer += byte
                     if len(self.__buffer) > 1 and (self.__buffer[-2:] == UbloxConst.HEADER_UBX or self.__buffer[-2:] == UbloxConst.HEADER_NMEA):
+                        if self.__buffer.startswith(UbloxConst.HEADER_UBX):
+                            total_length = int.from_bytes(self.__buffer[4:6], byteorder='little', signed=False) + 2
+                            if len(self.__buffer) < total_length:
+                                continue
                         # Process the current packet, excluding the last 2 bytes
                         self.__recv_data = self.__buffer[:-2]
                         if self.__recv_data_callback:
@@ -59,7 +63,7 @@ class UBloxSerialConnection:
     def write(self, data):
         if self.__serial_conn and self.__serial_conn.is_open:
             try:
-                self.__serial_conn.write(data.encode('utf-8'))
+                self.__serial_conn.write(data)#.encode('utf-8')
             except serial.SerialException as e:
                 print("Error ublox serial connection: ", f"write: {e}")
 
