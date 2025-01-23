@@ -13,19 +13,32 @@ import time
 
 class main:
 
-    def __init__(self):
-        
+    def __init__(self, online=True, save=True, file_path=''):
+
+        if save:
+            timeSaved = time.strftime("%Y-%m-%d_%H-%M-%S")
+            fileName = f"Ublox_GPS_{timeSaved}.csv"
+            self.csv_file = open('logs/' + fileName, mode='w', newline='')
+            self.csv_writer = csv.writer(self.csv_file)
+            self.csv_writer.writerow(['Timestamp', 'Latitude', 'Longitude', 'Altitude', 'GNSS_Time', 'Quality', 'NumSatellites', "Local_Datatime"])
+
+
         # credential = UbloxUtils.read_credentials(".\credentials.ini", tag="UCR")
         self.python_ublox = PythonUblox()
-        self.python_ublox.connect()
-        self.python_ublox.set_ublox_callback(callback=self.ublox_recv_data_callback)
+        if online:
+            self.python_ublox.connect()
+            self.python_ublox.set_ublox_callback(callback=self.ublox_recv_data_callback)
+        else:
+            for row in self.python_ublox.read_ubx_file(file_path):
+                self.ublox_recv_data_callback(row)
+     
+
+            # read data from 
+            # loop read data by rows
+
         # self.python_ublox.enable_RTK(credential, mountpoint="U-BLOX")
 
-        timeSaved = time.strftime("%Y-%m-%d_%H-%M-%S")
-        fileName = f"Ublox_GPS_{timeSaved}.csv"
-        self.csv_file = open('logs/' + fileName, mode='w', newline='')
-        self.csv_writer = csv.writer(self.csv_file)
-        self.csv_writer.writerow(['Timestamp', 'Latitude', 'Longitude', 'Altitude', 'GNSS_Time', 'Quality', 'NumSatellites', "Local_Datatime"])
+        
 
 
     def ublox_recv_data_callback(self, data):
@@ -34,13 +47,13 @@ class main:
                 self.python_ublox.nmea.decode(data)
                 # print(self.python_ublox.nmea.vtg.cog_mag) # heading
                 current_datetime = datetime.now()
-                print(current_datetime)
-                print(self.python_ublox.nmea.gga.lat) # lat
-                print(self.python_ublox.nmea.gga.lon) # lon 
-                print(self.python_ublox.nmea.gga.alt) # lon   
-                print(self.python_ublox.nmea.gga.time) # time  
-                print(self.python_ublox.nmea.gga.quality)
-                print(self.python_ublox.nmea.gga.numSV)
+                # print(current_datetime)
+                # print(self.python_ublox.nmea.gga.lat) # lat
+                # print(self.python_ublox.nmea.gga.lon) # lon 
+                # print(self.python_ublox.nmea.gga.alt) # lon   
+                # print(self.python_ublox.nmea.gga.time) # time  
+                # print(self.python_ublox.nmea.gga.quality)
+                # print(self.python_ublox.nmea.gga.numSV)
                 lat = self.python_ublox.nmea.gga.lat
                 lon = self.python_ublox.nmea.gga.lon
                 alt = self.python_ublox.nmea.gga.alt

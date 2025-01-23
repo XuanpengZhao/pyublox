@@ -30,6 +30,10 @@ class PythonUblox:
         self.__ublox_connection = UBloxSerialConnection(self.__device_port, self.__baud_rate)
         self.__ublox_connection.connect()
 
+    def read_ubx_file(self, file_path):
+        with open(file_path, 'rb') as file:
+            for line in file:
+                yield line.strip()
         # Enable RTK
     def enable_RTK(self, credential, mountpoint=None):
         if credential:
