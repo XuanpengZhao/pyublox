@@ -13,7 +13,7 @@ import time
 
 class main:
 
-    def __init__(self, online=True, save=True, file_path=''):
+    def __init__(self, online=True, save=True, rtk=False, file_path=''):
 
         if save:
             timeSaved = time.strftime("%Y-%m-%d_%H-%M-%S")
@@ -23,7 +23,6 @@ class main:
             self.csv_writer.writerow(['Timestamp', 'Latitude', 'Longitude', 'Altitude', 'GNSS_Time', 'Quality', 'NumSatellites', "Local_Datatime"])
 
 
-        # credential = UbloxUtils.read_credentials(".\credentials.ini", tag="UCR")
         self.python_ublox = PythonUblox()
         if online:
             self.python_ublox.connect()
@@ -35,8 +34,10 @@ class main:
 
             # read data from 
             # loop read data by rows
-
-        # self.python_ublox.enable_RTK(credential, mountpoint="U-BLOX")
+        if rtk:
+            credential = UbloxUtils.read_credentials(".\credentials.ini", tag="DEFAULT")
+            self.python_ublox.enable_RTK(credential)
+            # if mountpoint cannot be find, use u-center to find it manually 
 
         
 
@@ -73,5 +74,5 @@ class main:
 
 
 if __name__ == '__main__':
-    main()
+    main(rtk=True)
     
